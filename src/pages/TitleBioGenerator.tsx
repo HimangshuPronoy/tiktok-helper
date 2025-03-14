@@ -6,10 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Zap, Copy, Check, Bookmark, BookmarkCheck, Rocket } from "lucide-react";
+import { Sparkles, Zap, Copy, Check, Bookmark, BookmarkCheck, Rocket, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   contentType: z.string().min(1, "Please select a content type"),
@@ -44,67 +45,102 @@ const TitleBioGenerator = () => {
     setIsGenerating(true);
     
     try {
-      // Simulate API call to Gemini
-      setTimeout(() => {
-        const result = generateMockContent(data);
-        setGeneratedContent(result);
-        setIsGenerating(false);
-      }, 2000);
-    } catch (error) {
+      const { data: responseData, error } = await supabase.functions.invoke('generate-titles-bios', {
+        body: data,
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to generate content");
+      }
+
+      if (responseData.error) {
+        throw new Error(responseData.error);
+      }
+
+      setGeneratedContent(responseData);
+      
+      toast({
+        title: "Content generated",
+        description: "We've created some awesome TikTok content for you!",
+      });
+    } catch (error: any) {
       console.error("Error generating content:", error);
       toast({
         title: "Generation failed",
-        description: "There was an error generating your content. Please try again.",
+        description: error.message || "There was an error generating your content. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsGenerating(false);
     }
   };
 
-  const generateMockContent = (data: FormValues) => {
-    // Mock data to simulate Gemini API response
-    const isTitleType = data.contentType === "title" || data.contentType === "both";
-    const isBioType = data.contentType === "bio" || data.contentType === "both";
-
-    let titles: { text: string; saved: boolean; copied: boolean }[] = [];
-    if (isTitleType) {
-      const titleSamples = [
-        `How I ${data.niche === "fitness" ? "Lost 10lbs" : "Grew My Following"} in Just 1 Week! 🔥`,
-        `${data.tone === "humorous" ? "I Can't Believe This Actually Worked 😂" : "This Changed Everything For Me"}`,
-        `${data.niche} Hack That Nobody Is Talking About`,
-        `POV: When Your ${data.niche} Game Is Too Strong`,
-        `${data.tone === "professional" ? "Professional Guide:" : ""} ${data.keywords ? data.keywords : "Secret"} Tips For ${data.niche} Success`,
-        `This ${data.niche} Trick Went Viral Overnight!`,
-      ];
-      titles = titleSamples.map(title => ({ text: title, saved: false, copied: false }));
-    }
-
-    let bios: { text: string; saved: boolean; copied: boolean }[] = [];
-    if (isBioType) {
-      const bioSamples = [
-        `${data.tone === "professional" ? "Expert" : "Creator"} sharing daily ${data.niche} content | ${data.keywords ? data.keywords : "Tips & Tricks"} | Join me for new ${data.niche} insights every day!`,
-        `${data.tone === "humorous" ? "Just a ${data.niche} enthusiast who doesn't take life too seriously 😂" : `Passionate about all things ${data.niche}`} | New content drops MWF | DM for collabs`,
-        `Transforming the way you think about ${data.niche} | ${data.keywords ? data.keywords + " |" : ""} Follow for daily inspiration and ${data.niche} hacks`,
-        `${data.tone === "engaging" ? "Let's talk about" : "Exploring"} ${data.niche} together | ${data.keywords || "Trending tips"} | Join our community of ${Number(10000 + Math.random() * 90000).toLocaleString()} ${data.niche} lovers`,
-        `Your go-to source for ${data.tone === "professional" ? "professional" : "amazing"} ${data.niche} content | ${data.keywords ? data.keywords + " |" : ""} New uploads every day at 6PM EST`,
-      ];
-      bios = bioSamples.map(bio => ({ text: bio, saved: false, copied: false }));
-    }
-
-    return { titles, bios };
-  };
-
-  const toggleSave = (type: "title" | "bio", index: number) => {
+  const toggleSave = async (type: "title" | "bio", index: number) => {
     if (!generatedContent) return;
     
-    if (type === "title") {
-      const updatedTitles = [...generatedContent.titles];
-      updatedTitles[index].saved = !updatedTitles[index].saved;
-      setGeneratedContent({ ...generatedContent, titles: updatedTitles });
-    } else {
-      const updatedBios = [...generatedContent.bios];
-      updatedBios[index].saved = !updatedBios[index].saved;
-      setGeneratedContent({ ...generatedContent, bios: updatedBios });
+    // Generate a temporary user ID for demo purposes
+    // In a real app, this would be the authenticated user's ID
+    const tempUserId = "demo-user-123";
+    
+    try {
+      if (type === "title") {
+        const updatedTitles = [...generatedContent.titles];
+        const item = updatedTitles[index];
+        const newSavedState = !item.saved;
+        
+        if (newSavedState) {
+          // Save to database (in production this would connect to a Supabase function)
+          await supabase.from('saved_content').upsert({
+            user_id: tempUserId,
+            content_type: 'title',
+            content: item.text,
+            created_at: new Date().toISOString()
+          }).select();
+        } else {
+          // Delete from database (in production)
+          // This is simplified for demo purposes
+        }
+        
+        updatedTitles[index].saved = newSavedState;
+        setGeneratedContent({ ...generatedContent, titles: updatedTitles });
+        
+        toast({
+          title: newSavedState ? "Title saved" : "Title removed",
+          description: newSavedState ? "Title saved to your collection" : "Title removed from your collection",
+        });
+      } else {
+        const updatedBios = [...generatedContent.bios];
+        const item = updatedBios[index];
+        const newSavedState = !item.saved;
+        
+        if (newSavedState) {
+          // Save to database (in production this would connect to a Supabase function)
+          await supabase.from('saved_content').upsert({
+            user_id: tempUserId,
+            content_type: 'bio',
+            content: item.text,
+            created_at: new Date().toISOString()
+          }).select();
+        } else {
+          // Delete from database (in production)
+          // This is simplified for demo purposes
+        }
+        
+        updatedBios[index].saved = newSavedState;
+        setGeneratedContent({ ...generatedContent, bios: updatedBios });
+        
+        toast({
+          title: newSavedState ? "Bio saved" : "Bio removed",
+          description: newSavedState ? "Bio saved to your collection" : "Bio removed from your collection",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error saving content:", error);
+      toast({
+        title: "Save failed",
+        description: "There was an error saving your content. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -276,15 +312,33 @@ const TitleBioGenerator = () => {
                 isLoading={isGenerating}
                 className="w-full sm:w-auto flex items-center gap-2"
               >
-                <Zap size={18} />
-                <span>Generate Content</span>
+                {isGenerating ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={18} />
+                    <span>Generate Content</span>
+                  </>
+                )}
               </GradientButton>
             </div>
           </form>
         </Form>
       </GlassCard>
       
-      {generatedContent && (
+      {isGenerating && (
+        <div className="py-20 flex flex-col items-center justify-center">
+          <div className="w-12 h-12 rounded-full purple-pink-gradient p-3 mb-4">
+            <div className="animate-spin w-full h-full border-2 border-white/20 border-t-white rounded-full" />
+          </div>
+          <p className="text-white/60">Crafting creative titles and bios...</p>
+        </div>
+      )}
+      
+      {generatedContent && !isGenerating && (
         <div className="grid grid-cols-1 gap-6 animate-fade-in">
           {generatedContent.titles.length > 0 && (
             <GlassCard className="relative overflow-hidden">
