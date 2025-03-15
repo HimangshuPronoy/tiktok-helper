@@ -2,7 +2,7 @@
 import React from "react";
 import GlassCard from "../ui/GlassCard";
 import GradientButton from "../ui/GradientButton";
-import { LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const WelcomeSection = () => {
   return (
@@ -22,13 +22,16 @@ const WelcomeSection = () => {
           AI-powered tools designed for creator success.
         </p>
         <div className="flex flex-wrap gap-4">
-          <GradientButton size="lg" gradient="teal-purple">
-            <span>Explore Features</span>
-          </GradientButton>
-          <GradientButton size="lg" variant="outline" className="flex items-center gap-2">
-            <LogIn size={20} />
-            <span>Sign in with TikTok</span>
-          </GradientButton>
+          <Link to="/niche-finder">
+            <GradientButton size="lg" gradient="teal-purple">
+              <span>Explore Features</span>
+            </GradientButton>
+          </Link>
+          <Link to="/trend-analyzer">
+            <GradientButton size="lg" variant="outline" className="bg-black/20">
+              <span>Analyze Trends</span>
+            </GradientButton>
+          </Link>
         </div>
       </div>
     </GlassCard>

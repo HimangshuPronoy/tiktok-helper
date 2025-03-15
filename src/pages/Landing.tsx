@@ -98,6 +98,12 @@ const Landing = () => {
                 <span className="text-sm text-white/80">The Ultimate TikTok Growth Tool</span>
               </div>
               
+              {/* Free Banner Notification */}
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-tiktok-teal/20 mb-6 border border-tiktok-teal/30 mx-auto animate-pulse-slow">
+                <Star className="w-4 h-4 mr-2 text-tiktok-teal" />
+                <span className="text-sm font-bold text-tiktok-teal">✨ Limited Time Offer: Completely FREE Access ✨</span>
+              </div>
+              
               <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
                 <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                   <span className="text-gradient">Elevate Your</span>
@@ -117,17 +123,17 @@ const Landing = () => {
               </p>
               
               <div className="flex flex-wrap gap-4 justify-center">
-                <Link to="/dashboard">
-                  <GradientButton gradient="purple-pink" size="lg" className="group">
-                    Get Started 
-                    <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+                <Link to="/auth">
+                  <GradientButton size="lg" gradient="purple-pink" className="gap-2">
+                    <span>Get Started For Free</span>
+                    <ArrowRight size={16} />
                   </GradientButton>
                 </Link>
-                <Link to="/niche-finder">
-                  <GradientButton variant="outline" size="lg">
-                    Explore Tools
+                <a href="#features">
+                  <GradientButton size="lg" variant="outline" className="bg-black/20">
+                    <span>Explore Features</span>
                   </GradientButton>
-                </Link>
+                </a>
               </div>
             </div>
             
@@ -310,14 +316,17 @@ const Landing = () => {
               <div className="relative z-10">
                 <div className="text-center">
                   <h2 className="text-3xl md:text-5xl font-bold mb-6 text-gradient">Ready to Transform Your TikTok Strategy?</h2>
-                  <p className="text-white/70 mb-10 max-w-2xl mx-auto text-lg">
+                  <p className="text-white/70 mb-4 max-w-2xl mx-auto text-lg">
                     Join thousands of creators who are growing their audience and engagement with TikTokHelper.
                     Get started today and see results within your first week!
+                  </p>
+                  <p className="text-tiktok-teal font-bold mb-10 max-w-2xl mx-auto">
+                    Currently FREE for a limited time only! Don't miss out!
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link to="/dashboard">
                       <GradientButton size="lg" gradient="purple-pink" className="w-full sm:w-auto">
-                        Get Started Now
+                        Start Free Access Now
                       </GradientButton>
                     </Link>
                     <Link to="/trend-analyzer">

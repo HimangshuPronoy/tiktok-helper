@@ -89,16 +89,21 @@ const TitleBioGenerator = () => {
         const newSavedState = !item.saved;
         
         if (newSavedState) {
-          // Save to database (in production this would connect to a Supabase function)
-          await supabase.from('saved_content').upsert({
+          // Save to database using the correct table name "saved_titles_bios"
+          await supabase.from('saved_titles_bios').upsert({
             user_id: tempUserId,
-            content_type: 'title',
+            type: 'title',
             content: item.text,
             created_at: new Date().toISOString()
           }).select();
         } else {
-          // Delete from database (in production)
-          // This is simplified for demo purposes
+          // Delete from database
+          await supabase
+            .from('saved_titles_bios')
+            .delete()
+            .eq('user_id', tempUserId)
+            .eq('content', item.text)
+            .eq('type', 'title');
         }
         
         updatedTitles[index].saved = newSavedState;
@@ -114,16 +119,21 @@ const TitleBioGenerator = () => {
         const newSavedState = !item.saved;
         
         if (newSavedState) {
-          // Save to database (in production this would connect to a Supabase function)
-          await supabase.from('saved_content').upsert({
+          // Save to database using the correct table name "saved_titles_bios"
+          await supabase.from('saved_titles_bios').upsert({
             user_id: tempUserId,
-            content_type: 'bio',
+            type: 'bio',
             content: item.text,
             created_at: new Date().toISOString()
           }).select();
         } else {
-          // Delete from database (in production)
-          // This is simplified for demo purposes
+          // Delete from database
+          await supabase
+            .from('saved_titles_bios')
+            .delete()
+            .eq('user_id', tempUserId)
+            .eq('content', item.text)
+            .eq('type', 'bio');
         }
         
         updatedBios[index].saved = newSavedState;

@@ -3,6 +3,7 @@ import React from "react";
 import GlassCard from "../ui/GlassCard";
 import GradientButton from "../ui/GradientButton";
 import { TrendingUp, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const TrendingSection = () => {
   const trendingHashtags = [
@@ -18,6 +19,10 @@ const TrendingSection = () => {
     description:
       "Before-and-after desk setups are trending with creators showing productivity hacks and aesthetic improvements.",
     hashtags: ["#desksetup", "#productivityhack", "#workspace"],
+  };
+
+  const openTikTokSearch = (tag: string) => {
+    window.open(`https://www.tiktok.com/tag/${tag.replace('#', '')}`, '_blank');
   };
 
   return (
@@ -38,6 +43,7 @@ const TrendingSection = () => {
             {spotlightTrend.hashtags.map((tag) => (
               <span 
                 key={tag} 
+                onClick={() => openTikTokSearch(tag)}
                 className="px-3 py-1 text-sm bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
               >
                 {tag}
@@ -45,10 +51,12 @@ const TrendingSection = () => {
             ))}
           </div>
           
-          <GradientButton gradient="teal-purple" className="flex items-center gap-2">
-            <span>Try This Trend</span>
-            <ExternalLink size={16} />
-          </GradientButton>
+          <Link to="/trend-analyzer">
+            <GradientButton gradient="teal-purple" className="flex items-center gap-2">
+              <span>Try This Trend</span>
+              <ExternalLink size={16} />
+            </GradientButton>
+          </Link>
         </div>
       </GlassCard>
       
@@ -59,15 +67,25 @@ const TrendingSection = () => {
         </div>
         
         <div className="space-y-3">
-          {trendingHashtags.map((item, index) => (
+          {trendingHashtags.map((item) => (
             <div 
               key={item.tag}
+              onClick={() => openTikTokSearch(item.tag)}
               className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
             >
               <span className="text-white/90 font-medium">{item.tag}</span>
               <span className="text-sm text-white/60">{item.count} views</span>
             </div>
           ))}
+        </div>
+        
+        <div className="mt-4">
+          <Link to="/hashtag-generator">
+            <GradientButton size="sm" variant="outline" className="w-full flex items-center justify-center gap-2">
+              <span>Generate Hashtags</span>
+              <ExternalLink size={16} />
+            </GradientButton>
+          </Link>
         </div>
       </GlassCard>
     </div>

@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from "react";
 import GradientButton from "../ui/GradientButton";
-import { Bell, Menu, User, X, ChevronDown } from "lucide-react";
+import { Bell, Menu, User, X, ChevronDown, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 import { 
   DropdownMenu, 
   DropdownMenuTrigger, 
@@ -18,8 +19,8 @@ interface HeaderProps {
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,11 +34,6 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // For demo purposes, let's add a function to toggle login state
-  const toggleLogin = () => {
-    setIsLoggedIn(!isLoggedIn);
-  };
 
   return (
     <header
@@ -60,7 +56,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
       </div>
 
       <div className="flex items-center gap-2">
-        {isLoggedIn ? (
+        {user ? (
           <>
             <div className="relative">
               <button 
@@ -103,7 +99,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/5 transition-all">
                   <User size={20} />
-                  <span className="hidden md:inline text-sm">John Doe</span>
+                  <span className="hidden md:inline text-sm">{user.email?.split('@')[0] || 'User'}</span>
                   <ChevronDown size={14} className="text-white/60" />
                 </button>
               </DropdownMenuTrigger>
@@ -117,8 +113,9 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuItem 
                   className="hover:bg-white/10 cursor-pointer text-tiktok-pink"
-                  onClick={toggleLogin}
+                  onClick={() => signOut()}
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -126,9 +123,11 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           </>
         ) : (
           <div className="flex items-center">
-            <GradientButton size="sm" className="gap-2" onClick={toggleLogin}>
-              <span>Sign in</span>
-            </GradientButton>
+            <Link to="/auth">
+              <GradientButton size="sm" className="gap-2">
+                <span>Sign in</span>
+              </GradientButton>
+            </Link>
           </div>
         )}
       </div>
